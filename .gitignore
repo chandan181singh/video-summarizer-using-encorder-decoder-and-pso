@@ -7,8 +7,8 @@ myenv/
 #Other Folders and files
 models/
 models2/
-features/
-features2/
+features_resnet18/
+features_resnet50/
 random_video/
 summarized_videos/
 cuda-check.py
