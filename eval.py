@@ -1,5 +1,5 @@
 import torch
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from models import PSO
 import numpy as np
 
@@ -35,5 +35,6 @@ def evaluate_model(model, test_loader, device):
     precision = precision_score(all_labels, all_preds, average='binary', zero_division=0)
     recall = recall_score(all_labels, all_preds, average='binary', zero_division=0)
     f1 = f1_score(all_labels, all_preds, average='binary', zero_division=0)
+    accuracy = accuracy_score(all_labels, all_preds)
     
-    return precision, recall, f1
+    return precision, recall, f1, accuracy

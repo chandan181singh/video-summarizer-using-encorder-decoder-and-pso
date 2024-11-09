@@ -8,9 +8,9 @@ from eval import evaluate_model
 from tqdm import tqdm
 from prettytable import PrettyTable
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=10):
+def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=25):
     metrics_table = PrettyTable()
-    metrics_table.field_names = ["Epoch", "Loss", "Precision", "Recall", "F1-Score"]
+    metrics_table.field_names = ["Epoch", "Loss", "Precision", "Recall", "F1-Score", "Accuracy"]
     
     for epoch in range(num_epochs):
         # Set model to training mode
@@ -42,7 +42,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
         
         # Evaluation phase
         model.eval()  # Set model to evaluation mode
-        precision, recall, f1 = evaluate_model(model, val_loader, device)
+        precision, recall, f1, accuracy = evaluate_model(model, val_loader, device)
         
         # Add metrics to table
         metrics_table.add_row([
@@ -50,7 +50,8 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
             f"{avg_loss:.4f}",
             f"{precision:.4f}",
             f"{recall:.4f}",
-            f"{f1:.4f}"
+            f"{f1:.4f}",
+            f"{accuracy:.4f}"
         ])
         
         # Print current epoch's metrics
@@ -88,7 +89,7 @@ def main():
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'metrics': metrics_table.get_string()
-    }, 'models/video_summarizer_resnet18.pth')
+    }, 'models/video_summarizer_resnet18_1.pth')
 
 if __name__ == "__main__":
     main()
