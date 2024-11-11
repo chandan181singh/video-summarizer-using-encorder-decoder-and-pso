@@ -1,4 +1,4 @@
-# Video Summarization using PSO
+# Video Summarization using Encoder-Decoder Architecture with PSO
 
 Steps to run the code:
 
