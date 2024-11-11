@@ -69,16 +69,38 @@ def main():
     dataset = VideoDataset(get_features_path(), get_annotation_path())
     
     # Split dataset into train and validation
-    train_size = int(0.8 * len(dataset))
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+    # train_size = int(0.8 * len(dataset))
+    # val_size = len(dataset) - train_size
+    # train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+    
+    # Get video categories from the dataset
+    categories = dataset.anno_df['category'].unique()
+    
+    # Create indices for train and validation splits
+    train_indices = []
+    val_indices = []
+    
+    # For each category, take one video for validation and rest for training
+    for category in categories:
+        # Get indices of videos in this category
+        category_indices = [i for i, vid_id in enumerate(dataset.video_ids) 
+                          if dataset.anno_df[dataset.anno_df['video_id'] == vid_id]['category'].iloc[0] == category]
+        
+        # Take one video for validation
+        val_indices.append(category_indices.pop())
+        # Add remaining videos to training
+        train_indices.extend(category_indices)
+    
+    # Create train and validation datasets using the indices
+    train_dataset = torch.utils.data.Subset(dataset, train_indices)
+    val_dataset = torch.utils.data.Subset(dataset, val_indices)
     
     train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=4, shuffle=False)
     
     # Initialize model
     model = VideoSummarizer().to(device)
-    criterion = nn.BCELoss()
+    criterion = nn.BCELoss()  # Binary Cross Entropy Loss
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     
     # Train the model and get metrics

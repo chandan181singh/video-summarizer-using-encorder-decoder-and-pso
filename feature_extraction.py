@@ -29,9 +29,9 @@ def preprocess_frame(frame):
         transforms.ToPILImage(),
         transforms.Resize(256),
         transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                           std=[0.229, 0.224, 0.225])
+        transforms.ToTensor(), 
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                           std=[0.229, 0.224, 0.225]) # ImageNet per RBG channel mean and std 
     ])
     return transform(frame)
 
@@ -52,7 +52,7 @@ def extract_features(video_path, model, device, sample_rate=30):
             
             # Preprocess the frame
             input_tensor = preprocess_frame(frame)
-            input_batch = input_tensor.unsqueeze(0).to(device)
+            input_batch = input_tensor.unsqueeze(0).to(device) # Add batch dimension at index 0
             
             # Extract features
             with torch.no_grad():
