@@ -1,4 +1,4 @@
-# Video Summarization using Encoder-Decoder Architecture with PSO
+# Video Summarization using PSO
 
 `Training → Model Predictions → PSO Optimization → Final Summary`
 
