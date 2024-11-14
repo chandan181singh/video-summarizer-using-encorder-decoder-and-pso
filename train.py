@@ -111,7 +111,7 @@ def main():
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'metrics': metrics_table.get_string()
-    }, 'models/video_summarizer_resnet18_1.pth')
+    }, 'models/video_summarizer_resnet18_bahdanau.pth')
 
 if __name__ == "__main__":
     main()

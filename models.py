@@ -6,6 +6,7 @@ import os
 import pandas as pd
 import math
 from luang_attention import LuongAttention
+from bahdanau_attention import BahdanauAttention
 
 class VideoSummarizer(nn.Module):
     def __init__(self, input_dim=512, hidden_dim=256, num_layers=2, dropout=0.1):
@@ -33,8 +34,11 @@ class VideoSummarizer(nn.Module):
             batch_first=True
         )
         
-        # Attention mechanism
-        self.attention = LuongAttention(hidden_dim * 2, method='general')  # Double size to match encoder output
+        # Attention mechanism (Luong)
+        #self.attention = LuongAttention(hidden_dim * 2, method='general')  # Double size to match encoder output
+        
+        # Attention mechanism (Bahdanau)
+        self.attention = BahdanauAttention(hidden_dim * 2, hidden_dim * 2)
         
         # Output layer
         self.output_layer = nn.Linear(hidden_dim * 2, 1)

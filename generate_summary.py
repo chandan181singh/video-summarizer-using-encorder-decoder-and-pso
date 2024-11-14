@@ -105,7 +105,7 @@ class VideoSummarizer:
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         
         output_filename = os.path.basename(video_path)
-        output_basename = os.path.splitext(output_filename)[0] + '_summary6.avi'
+        output_basename = os.path.splitext(output_filename)[0] + '_summary7.avi'
         output_path = os.path.join(get_summarized_video_path(), output_basename)
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
@@ -143,10 +143,10 @@ class VideoSummarizer:
 
 def main():
     
-    model_path = os.path.join(get_model_path(), "best_model.pth")
+    model_path = os.path.join(get_model_path(), "video_summarizer_resnet18_1.pth")
     print(model_path)
 
-    summary_path = os.path.join(get_random_video_path(), "tyre_change.mp4")
+    summary_path = os.path.join(get_random_video_path(), "98MoyGZKHXc.mp4")
     print(summary_path)
 
     summarizer = VideoSummarizer(model_path)

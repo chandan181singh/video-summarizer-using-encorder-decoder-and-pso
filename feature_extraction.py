@@ -57,7 +57,7 @@ def extract_features(video_path, model, device, sample_rate=30):
             # Extract features
             with torch.no_grad():
                 feature = model(input_batch)
-                feature = feature.squeeze().cpu().numpy()
+                feature = feature.squeeze().cpu().numpy() # remove all the dimensions of size 1
                 features.append(feature)
                 
         frame_count += 1
