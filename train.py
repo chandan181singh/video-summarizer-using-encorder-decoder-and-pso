@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from path import get_features_path, get_annotation_path
+from path import FEATURES_PATH, ANNOTATION_PATH, MODEL_NAME, DATASET
 from models import VideoSummarizer, VideoDataset
 from eval import evaluate_model
 from tqdm import tqdm
@@ -12,12 +12,14 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
     metrics_table = PrettyTable()
     metrics_table.field_names = ["Epoch", "Loss", "Precision", "Recall", "F1-Score", "Accuracy"]
     
+    # Increase positive class weight significantly to focus on recall
+    pos_weight = torch.tensor([10.0 if DATASET == "SumMe" else 8.0]).to(device)
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    
     for epoch in range(num_epochs):
-        # Set model to training mode
         model.train()
         total_loss = 0
         
-        # Training loop
         for features, labels, mask in tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs}'):
             features, labels, mask = features.to(device), labels.to(device), mask.to(device)
             
@@ -28,13 +30,21 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
             outputs = outputs[mask]
             labels = labels[mask]
             
-            # Convert labels to binary for training
-            binary_labels = (labels > 0.5).float()
+            # Dynamic thresholding for binary labels
+            if DATASET == "SumMe":
+                threshold = labels.mean() + labels.std()
+            else:
+                threshold = 0.5
+            
+            binary_labels = (labels > threshold).float()
             
             loss = criterion(outputs, binary_labels)
             loss.backward()
-            optimizer.step()
             
+            # Gradient clipping to prevent exploding gradients
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            
+            optimizer.step()
             total_loss += loss.item()
         
         # Calculate average loss
@@ -44,6 +54,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
         model.eval()  # Set model to evaluation mode
         precision, recall, f1, accuracy = evaluate_model(model, val_loader, device)
         
+        #print(f"Epoch {epoch+1}: Precision: {precision}, Recall: {recall}, F1: {f1}, Accuracy: {accuracy}")
         # Add metrics to table
         metrics_table.add_row([
             f"{epoch+1}",
@@ -54,7 +65,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
             f"{accuracy:.4f}"
         ])
         
-        # Print current epoch's metrics
+        #Print current epoch's metrics
         if (epoch + 1) % 5 == 0:
             print("\nTraining Metrics:")
             print(metrics_table)
@@ -66,7 +77,7 @@ def main():
     print(f"Using device: {device}")
     
     # Initialize dataset and dataloader
-    dataset = VideoDataset(get_features_path(), get_annotation_path())
+    dataset = VideoDataset(FEATURES_PATH, ANNOTATION_PATH)
     
     # Split dataset into train and validation
     # train_size = int(0.8 * len(dataset))
@@ -111,7 +122,7 @@ def main():
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'metrics': metrics_table.get_string()
-    }, 'models/video_summarizer_resnet18_bahdanau.pth')
+    }, MODEL_NAME)
 
 if __name__ == "__main__":
     main()

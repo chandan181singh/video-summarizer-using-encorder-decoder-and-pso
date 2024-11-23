@@ -6,14 +6,14 @@ import cv2
 import os
 import numpy as np
 from tqdm import tqdm
-from path import get_video_path, get_features_path
+from path import VIDEO_PATH, FEATURES_PATH, FEATURE_EXTRACTION_MODEL
 
 def load_model():
-    # Load pre-trained ResNet18 model
-    model = models.resnet18(pretrained=True)
-
-    # Load pre-trained ResNet50 model
-    # model = models.resnet50(pretrained=True)
+    # Load pre-trained ResNet model
+    if FEATURE_EXTRACTION_MODEL=="resnet18":
+        model = models.resnet18(weights='IMAGENET1K_V1')
+    else:
+        model = models.resnet50(weights='IMAGENET1K_V1')
     
     # Remove the final fully connected layer
     model = nn.Sequential(*list(model.children())[:-1])
@@ -26,12 +26,10 @@ def load_model():
 def preprocess_frame(frame):
     # Define the same transforms used during training
     transform = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(), 
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                           std=[0.229, 0.224, 0.225]) # ImageNet per RBG channel mean and std 
+        transforms.ToPILImage(),  # Convert numpy array (OpenCV) to PIL Image
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
     return transform(frame)
 
@@ -57,7 +55,7 @@ def extract_features(video_path, model, device, sample_rate=30):
             # Extract features
             with torch.no_grad():
                 feature = model(input_batch)
-                feature = feature.squeeze().cpu().numpy() # remove all the dimensions of size 1
+                feature = feature.squeeze().cpu().numpy()
                 features.append(feature)
                 
         frame_count += 1
@@ -67,8 +65,8 @@ def extract_features(video_path, model, device, sample_rate=30):
 
 def main():
     # Directory containing videos
-    video_dir = get_video_path()  # Change this to your video directory
-    output_dir = get_features_path()  # Directory to save features
+    video_dir = VIDEO_PATH  # Change this to your video directory
+    output_dir = FEATURES_PATH  # Directory to save features
     
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)

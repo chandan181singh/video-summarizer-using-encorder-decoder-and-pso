@@ -6,7 +6,7 @@ from feature_extraction import extract_features, load_model
 import os
 from knapsack import knapsack_dp
 from kts import cpd_auto, cpd_nonlin
-from path import get_model_path, get_random_video_path, get_summarized_video_path
+from path import MODEL_NAME, RANDOM_VIDEO_PATH, SUMMARIZED_VIDEO_NAME
 import os
 class VideoSummarizer:
     def __init__(self, model_path, device='cuda' if torch.cuda.is_available() else 'cpu'):
@@ -104,9 +104,7 @@ class VideoSummarizer:
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         
-        output_filename = os.path.basename(video_path)
-        output_basename = os.path.splitext(output_filename)[0] + '_summary7.avi'
-        output_path = os.path.join(get_summarized_video_path(), output_basename)
+        output_path = os.path.join(SUMMARIZED_VIDEO_NAME)
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
         
@@ -143,10 +141,10 @@ class VideoSummarizer:
 
 def main():
     
-    model_path = os.path.join(get_model_path(), "video_summarizer_resnet18_1.pth")
+    model_path = os.path.join(MODEL_NAME)
     print(model_path)
 
-    summary_path = os.path.join(get_random_video_path(), "98MoyGZKHXc.mp4")
+    summary_path = os.path.join(RANDOM_VIDEO_PATH)
     print(summary_path)
 
     summarizer = VideoSummarizer(model_path)
