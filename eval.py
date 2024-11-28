@@ -20,7 +20,7 @@ def evaluate_model(model, test_loader, device):
             if DATASET == "SumMe":
                 threshold = labels.mean() * 0.7
             else:
-                threshold = 0.3
+                threshold = 0.25
             
             binary_labels = (labels > threshold).cpu().numpy()
             

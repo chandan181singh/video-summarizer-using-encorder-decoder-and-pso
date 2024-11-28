@@ -1,4 +1,4 @@
-```shell
+
 Dataset:  SumMe
 Feature:  Features/features_SumMe_resnet18_1
 Attention_Model:  Luong

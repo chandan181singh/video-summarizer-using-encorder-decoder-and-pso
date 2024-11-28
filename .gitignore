@@ -8,3 +8,4 @@ myenv/
 summarized_videos/
 cuda-check.py
 Latex/
+models/

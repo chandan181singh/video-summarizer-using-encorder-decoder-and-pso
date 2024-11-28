@@ -2,20 +2,26 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from path import FEATURES_PATH, ANNOTATION_PATH, MODEL_NAME, DATASET
+from path import FEATURES_PATH, ANNOTATION_PATH, MODEL_NAME, DATASET, ATTENTION_MODEL
 from models import VideoSummarizer, VideoDataset
 from eval import evaluate_model
 from tqdm import tqdm
 from prettytable import PrettyTable
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=25):
+def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs=40):
     metrics_table = PrettyTable()
     metrics_table.field_names = ["Epoch", "Loss", "Precision", "Recall", "F1-Score", "Accuracy"]
     
-    # Increase positive class weight significantly to focus on recall
-    pos_weight = torch.tensor([10.0 if DATASET == "SumMe" else 8.0]).to(device)
+    # Increase positive class weight even more
+    pos_weight = torch.tensor([12.0 if DATASET == "SumMe" else 10.0]).to(device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     
+    # Add learning rate scheduler
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', 
+                                                    factor=0.5, patience=3, 
+                                                    verbose=True)
+    
+    best_f1 = 0
     for epoch in range(num_epochs):
         model.train()
         total_loss = 0
@@ -66,13 +72,29 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
         ])
         
         #Print current epoch's metrics
-        if (epoch + 1) % 5 == 0:
+        if (epoch + 1) == num_epochs:
             print("\nTraining Metrics:")
             print(metrics_table)
+        
+        # Adjust learning rate based on F1 score
+        scheduler.step(f1)
+        
+        # Save best model
+        if f1 > best_f1:
+            best_f1 = f1
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'f1': f1
+            }, f'{MODEL_NAME}_best')
     
     return metrics_table
 
 def main():
+    print(f"Dataset: {DATASET}")
+    print(f"Features path: {FEATURES_PATH}")
+    print(f"Attention model: {ATTENTION_MODEL}")
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     
@@ -112,7 +134,7 @@ def main():
     # Initialize model
     model = VideoSummarizer().to(device)
     criterion = nn.BCELoss()  # Binary Cross Entropy Loss
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.002, weight_decay=1e-5)
     
     # Train the model and get metrics
     metrics_table = train_model(model, train_loader, val_loader, criterion, optimizer, device)

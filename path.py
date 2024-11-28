@@ -21,9 +21,9 @@ else:  # TVSum
 # Common paths for both datasets
 MODEL_PATH = os.path.join("models")
 os.makedirs(MODEL_PATH, exist_ok=True)
-MODEL_NAME = os.path.join(MODEL_PATH, f"model_{DATASET}_{FEATURE_EXTRACTION_MODEL}_{ATTENTION_MODEL}_4.pth")
+MODEL_NAME = os.path.join(MODEL_PATH, f"model_{DATASET}_{FEATURE_EXTRACTION_MODEL}_{ATTENTION_MODEL}_5.pth")
 
-FEATURES_PATH = os.path.join(f"Features/features_{DATASET}_{FEATURE_EXTRACTION_MODEL}_1")
+FEATURES_PATH = os.path.join(f"Features/features_{DATASET}_{FEATURE_EXTRACTION_MODEL}_2")
 os.makedirs(FEATURES_PATH, exist_ok=True)
 
 SUMMARIZED_VIDEO_PATH = os.path.join("summarized_videos", DATASET)
@@ -31,6 +31,10 @@ os.makedirs(SUMMARIZED_VIDEO_PATH, exist_ok=True)
 
 METRICS_PATH = os.path.join(f"metrics/metrics_{DATASET}_{FEATURE_EXTRACTION_MODEL}_{ATTENTION_MODEL}.md")
 os.makedirs(os.path.dirname(METRICS_PATH), exist_ok=True)
+
+RANDOM_VIDEO_PATH = os.path.join(f"random_video/tyre_change.mp4")
+
+SUMMARIZED_VIDEO_NAME = os.path.join(f"summarized_videos/summary_{DATASET}_{FEATURE_EXTRACTION_MODEL}_{ATTENTION_MODEL}.avi")
 
 # Dataset specific configurations
 DATASET_CONFIG = {

@@ -230,7 +230,7 @@ class PSO:
         self.max_summary_length = DATASET_CONFIG[DATASET]['max_summary_length'] * 1.5
         
         # Initialize positions with higher probability of selection
-        self.positions = np.random.rand(n_particles, len(scores)) * 1.2
+        self.positions = np.random.rand(n_particles, len(scores)) * 1.5
         self._adjust_positions_to_length_constraint()
         
         self.velocities = np.random.randn(n_particles, len(scores)) * 0.1
@@ -251,9 +251,16 @@ class PSO:
 
     def _evaluate(self, position):
         selected_scores = self.scores[position]
-        # Reward selecting more frames
-        selection_bonus = position.sum() / len(position) * 0.2
-        return np.mean(selected_scores) + selection_bonus
+        # Increase selection bonus and add continuity bonus
+        selection_bonus = position.sum() / len(position) * 0.3
+        
+        # Add continuity bonus to favor consecutive frames
+        continuity_bonus = 0
+        for i in range(1, len(position)):
+            if position[i] == position[i-1] == 1:
+                continuity_bonus += 0.1
+                
+        return np.mean(selected_scores) + selection_bonus + continuity_bonus
 
     def optimize(self):
         w, c1, c2 = 0.7, 1.5, 1.5
